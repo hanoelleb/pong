@@ -50,15 +50,17 @@ const ai = (() => {
          ctx.fillRect(xPos, yPos, width, height);
     }
 
-    return {update};
+    const reset = () => {
+        yPos = (canvas.height - height)/2;
+	draw();
+    }
+
+    return {update, reset};
 })();
 
 const ball = (() => {
     let xPos = canvas.width/2;
     let yPos = canvas.height/2;
-
-    var dX = 0;
-    var dY = 50;
 
     let speed = 4;
 
@@ -70,8 +72,10 @@ const ball = (() => {
 	    velocity.y *= -1;
 
         if (xPos < 0 || xPos > canvas.width) {
+	    playerWon = xPos > canvas.width;
 	    xPos = canvas.width/2;
 	    yPos = canvas.height/2;
+	    endRound(playerWon);
         }
 
 	xPos += velocity.x;
@@ -89,11 +93,52 @@ const ball = (() => {
         ctx.fill();
     }
 
+    const reset = () => {
+        xPos = canvas.width/2;
+        yPos = canvas.height/2;
+	draw();
+    }
+
     const getYPos = () => {
         return yPos;
     }
 
     return {update, getYPos};
+})();
+
+const scoreBoard = (() => {
+    let player = 0;
+    let ai = 0;
+
+    const incPlayer = () => {
+        player++;
+    }
+
+    const getPlayer = () => {
+        return player;
+    }
+
+    const incAi = () => {
+       ai++;
+    }
+
+    const getAi = () => {
+        return ai;
+    }
+
+    draw = () => {
+        var ctx = canvas.getContext('2d');
+        
+	ctx.font = '24px arial';
+
+	ctx.fillText(player, 30, 50);
+	//draw playerscore
+	
+	//draw ai score
+	ctx.fillText(ai, canvas.width-30, 50);
+    }
+
+    return { incPlayer, incAi, draw };
 })();
 
 function clear() {
@@ -107,17 +152,32 @@ canvas.addEventListener('mousemove', (e) => {
     mouseEvent = e; 
 });
 
+function endRound(playerWon) {
+    running = false;
+
+    if (playerWon)
+	scoreBoard.incPlayer();
+    else
+	scoreBoard.incAi();
+    
+    ai.reset();
+    clearInterval(gameLoop);
+    clear();
+}
+
 function loop() {
     clear();
     ball.update();
     paddle.update(mouseEvent);
     ai.update();
+    scoreBoard.draw();
 }
 
+var gameLoop;
 loop();
 function startGame(event) {
     if (event.which == 32 && !running) {
-        setInterval(loop, 50);
+        gameLoop = setInterval(loop, 50);
 	running = true;
     }
 }

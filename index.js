@@ -40,6 +40,7 @@ const ai = (() => {
     let max = 390;
 
     const update = () => {
+	yPos = ball.getYPos();
         draw();
     }
 
@@ -53,21 +54,46 @@ const ai = (() => {
 })();
 
 const ball = (() => {
-    var xPos;
-    var yPos;
+    let xPos = canvas.width/2;
+    let yPos = canvas.height/2;
+
+    var dX = 0;
+    var dY = 50;
+
+    let speed = 4;
+
+    var velocity = { x: speed, y: speed } 
 
     const update = () => {
+
+	if (yPos < 0 || yPos > canvas.height)
+	    velocity.y *= -1;
+
+        if (xPos < 0 || xPos > canvas.width) {
+	    xPos = canvas.width/2;
+	    yPos = canvas.height/2;
+        }
+
+	xPos += velocity.x;
+
+	yPos += velocity.y;
+
         draw();
     }
 
     const draw = () => {
         var ctx = canvas.getContext('2d');
+	ctx.beginPath();
         ctx.fillStyle = 'white';
-        ctx.arc(canvas.width/2, canvas.height/2, 5, 0, 2 * Math.PI);
+        ctx.arc(xPos, yPos, 5, 0, 2 * Math.PI);
         ctx.fill();
     }
 
-    return {update};
+    const getYPos = () => {
+        return yPos;
+    }
+
+    return {update, getYPos};
 })();
 
 function clear() {
@@ -76,12 +102,25 @@ function clear() {
      ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function loop(e) {
+var mouseEvent = {layerY: canvas.height/2};
+canvas.addEventListener('mousemove', (e) => { 
+    mouseEvent = e; 
+});
+
+function loop() {
     clear();
-    paddle.update(e);
-    ai.update();
     ball.update();
+    paddle.update(mouseEvent);
+    ai.update();
 }
 
-canvas.addEventListener('mousemove', loop);
+loop();
+function startGame(event) {
+    if (event.which == 32 && !running) {
+        setInterval(loop, 50);
+	running = true;
+    }
+}
 
+running = false;
+document.addEventListener('keypress', startGame);

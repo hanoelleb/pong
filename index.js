@@ -27,7 +27,14 @@ const paddle = (() => {
             ctx.fillRect(xPos, max, width, height);
     }
 
-    return {update};
+    const getCollide = () => {
+	var collide = yPos;
+	if (collide < 0)
+	    collide *= -1;
+        return {start: collide, end: collide+60};
+    }
+
+    return {update, getCollide};
 })();
 
 const ai = (() => {
@@ -38,9 +45,14 @@ const ai = (() => {
     let width = canvas.width;
 
     let max = 390;
+    let min = 0;
 
     const update = () => {
-	yPos = ball.getYPos();
+	yPos = ball.getYPos() - height/2;
+	if (yPos > max)
+	    yPos = max;
+	if (yPos < min)
+	    yPos = min;
         draw();
     }
 
@@ -55,7 +67,14 @@ const ai = (() => {
 	draw();
     }
 
-    return {update, reset};
+    const getCollide = () => {
+        var collide = yPos;
+        if (collide < 0)
+            collide *= -1;
+        return {start: collide, end: collide+60};
+    }
+
+    return {update, getCollide, reset};
 })();
 
 const ball = (() => {
@@ -77,6 +96,19 @@ const ball = (() => {
 	    yPos = canvas.height/2;
 	    endRound(playerWon);
         }
+
+	else if (xPos === 10) {
+	    var check = paddle.getCollide();
+	    if (yPos >= check.start && yPos <=check.end)
+                velocity.x *= -1;
+	} 
+	else if (xPos === canvas.width-10) {
+	    var check = ai.getCollide();
+	    console.log(check);
+	    if (yPos >= check.start-2 && yPos <=check.end+2) {
+		velocity.x *= -1;
+	    }
+	}
 
 	xPos += velocity.x;
 
@@ -129,12 +161,10 @@ const scoreBoard = (() => {
     draw = () => {
         var ctx = canvas.getContext('2d');
         
-	ctx.font = '24px arial';
+	ctx.font = '24px helvetica';
 
 	ctx.fillText(player, 30, 50);
-	//draw playerscore
 	
-	//draw ai score
 	ctx.fillText(ai, canvas.width-30, 50);
     }
 

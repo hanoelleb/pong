@@ -18,13 +18,15 @@ const paddle = (() => {
     var yPos;
     let xPos = 0;
 
+    let offset = 75;
+
     let height = 60;
     let width = 10;
 
     let max = 390;
 
     const update = (e) => {
-        yPos = e.layerY - 10;
+        yPos = e.layerY - offset;
 	draw();
     }
 

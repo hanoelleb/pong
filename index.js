@@ -1,3 +1,14 @@
+WebFontConfig = {
+  google:{ families: ['Press Start 2P'] },
+  active: function(){start();},
+};
+(function(){
+  var wf = document.createElement("script");
+  wf.src = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap';
+  wf.async = 'true';
+  document.head.appendChild(wf);
+})();
+
 var canvas = document.getElementById('game');
 var ctx = canvas.getContext('2d');
 ctx.fillStyle = 'black';
@@ -160,12 +171,11 @@ const scoreBoard = (() => {
 
     draw = () => {
         var ctx = canvas.getContext('2d');
-        
-	ctx.font = '24px helvetica';
+        ctx.font = "24px 'Press Start 2P'";
 
-	ctx.fillText(player, 30, 50);
-	
-	ctx.fillText(ai, canvas.width-30, 50);
+        ctx.fillText(player, 30, 50);
+
+        ctx.fillText(ai, canvas.width-30, 50);
     }
 
     return { incPlayer, incAi, draw };
